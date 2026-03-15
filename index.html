@@ -2755,10 +2755,20 @@
         }
         const supEl = document.getElementById("s_sup");
         const engEl = document.getElementById("s_engineers");
-        const supervisorId = supEl.value || null;
-        const supervisorName = supEl.options[supEl.selectedIndex]?.text || "";
+        // Sanitize: ensure empty string becomes null for UUID fields
+        const supervisorId =
+          supEl.value && supEl.value.trim() !== "" ? supEl.value.trim() : null;
+        const supervisorName =
+          supervisorId && supEl.selectedIndex >= 0
+            ? (supEl.options[supEl.selectedIndex]?.text || "")
+                .replace("-- Select Supervisor --", "")
+                .trim()
+            : "";
+        // Filter out empty strings from engineer IDs
         const engineerIds = engEl
-          ? Array.from(engEl.selectedOptions).map((o) => o.value)
+          ? Array.from(engEl.selectedOptions)
+              .map((o) => o.value)
+              .filter((v) => v && v.trim() !== "")
           : [];
         const obj = {
           name,
@@ -2824,24 +2834,26 @@
         if (!guard("canDeleteSite", "Admin only")) return;
         if (
           !confirm(
-            "Delete this site? Workers linked to this site will be unlinked.",
+            "Delete this site?\nAll linked workers, attendance, material entries and cashbook records will be unlinked.",
           )
         )
           return;
         try {
-          // Step 1: Unlink workers from this site (removes FK reference)
-          const { error: wErr } = await sb
-            .from("workers")
-            .update({ site_id: null })
-            .eq("site_id", id);
-          if (wErr) throw wErr;
-          // Step 2: Unlink attendance records
-          const { error: aErr } = await sb
-            .from("attendance")
-            .update({ site_id: null })
-            .eq("site_id", id);
-          if (aErr) throw aErr;
-          // Step 3: Now safe to delete the site
+          // Unlink all FK-referencing tables before deleting site
+          const tables = [
+            "workers",
+            "attendance",
+            "material_entries",
+            "cashbook",
+          ];
+          for (const tbl of tables) {
+            const { error } = await sb
+              .from(tbl)
+              .update({ site_id: null })
+              .eq("site_id", id);
+            if (error) throw error;
+          }
+          // Now safe to delete site
           await dbDelete("sites", id);
           populateAllDropdowns();
           renderSites();
