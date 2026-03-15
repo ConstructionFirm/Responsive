@@ -36,8 +36,12 @@
         overflow: hidden;
       }
       @media (max-width: 600px) {
-        body { height: 100dvh; }
-        #appWrapper { height: 100dvh; }
+        body {
+          height: 100dvh;
+        }
+        #appWrapper {
+          height: 100dvh;
+        }
       }
       /* ── AUTH ── */
       #loginScreen {
@@ -389,10 +393,18 @@
       }
       /* ── RESPONSIVE: TABLET (≤900px) ── */
       @media (max-width: 900px) {
-        .g4 { grid-template-columns: repeat(2, 1fr); }
-        .g5 { grid-template-columns: repeat(2, 1fr); }
-        .g3 { grid-template-columns: 1fr; }
-        .g2 { grid-template-columns: 1fr; }
+        .g4 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .g5 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .g3 {
+          grid-template-columns: 1fr;
+        }
+        .g2 {
+          grid-template-columns: 1fr;
+        }
         .sidebar {
           position: fixed;
           left: -230px;
@@ -401,68 +413,167 @@
           z-index: 300;
           transition: left 0.3s ease;
         }
-        .sidebar.open { left: 0; }
+        .sidebar.open {
+          left: 0;
+        }
         .sidebar-overlay {
           display: none;
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.45);
+          background: rgba(0, 0, 0, 0.45);
           z-index: 299;
         }
-        .sidebar-overlay.show { display: block; }
-        .topbar { padding: 0 12px; }
-        .topbar-right .date-badge { display: none; }
-        .content { padding: 10px; }
-        .fbar { gap: 6px; }
-        .fi { font-size: 12px; padding: 6px 8px; }
-        .kpi { padding: 12px; }
-        .kpi-val { font-size: 20px; }
-        .card { padding: 12px; }
-        .sc { padding: 12px; }
-        .sv { font-size: 22px; }
-        .chbox { height: 160px; }
-        .srow { gap: 8px; }
-        .sp { padding: 10px 12px; min-width: 90px; }
-        .mf { flex-wrap: wrap; }
-        .mf .btn { flex: 1; min-width: 100px; }
-        .export-btn { display: none; }
+        .sidebar-overlay.show {
+          display: block;
+        }
+        .topbar {
+          padding: 0 12px;
+        }
+        .topbar-right .date-badge {
+          display: none;
+        }
+        .content {
+          padding: 10px;
+        }
+        .fbar {
+          gap: 6px;
+        }
+        .fi {
+          font-size: 12px;
+          padding: 6px 8px;
+        }
+        .kpi {
+          padding: 12px;
+        }
+        .kpi-val {
+          font-size: 20px;
+        }
+        .card {
+          padding: 12px;
+        }
+        .sc {
+          padding: 12px;
+        }
+        .sv {
+          font-size: 22px;
+        }
+        .chbox {
+          height: 160px;
+        }
+        .srow {
+          gap: 8px;
+        }
+        .sp {
+          padding: 10px 12px;
+          min-width: 90px;
+        }
+        .mf {
+          flex-wrap: wrap;
+        }
+        .mf .btn {
+          flex: 1;
+          min-width: 100px;
+        }
+        .export-btn {
+          display: none;
+        }
       }
 
       /* ── RESPONSIVE: MOBILE (≤600px) ── */
       @media (max-width: 600px) {
-        body { font-size: 13px; }
-        .g4 { grid-template-columns: 1fr 1fr; }
-        .g5 { grid-template-columns: 1fr 1fr; }
-        .g3 { grid-template-columns: 1fr; }
-        .g2 { grid-template-columns: 1fr; }
-        #appWrapper { flex-direction: column; }
-        .main { width: 100%; overflow: hidden; }
-        .content { padding: 8px; overflow-x: hidden; }
-        .topbar { padding: 0 10px; height: 50px; }
-        .page-bread { display: none; }
-        .topbar-right { gap: 6px; }
-        .site-filter select { max-width: 100px; font-size: 11px; }
+        body {
+          font-size: 13px;
+        }
+        .g4 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .g5 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .g3 {
+          grid-template-columns: 1fr;
+        }
+        .g2 {
+          grid-template-columns: 1fr;
+        }
+        #appWrapper {
+          flex-direction: column;
+        }
+        .main {
+          width: 100%;
+          overflow: hidden;
+        }
+        .content {
+          padding: 8px;
+          overflow-x: hidden;
+        }
+        .topbar {
+          padding: 0 10px;
+          height: 50px;
+        }
+        .page-bread {
+          display: none;
+        }
+        .topbar-right {
+          gap: 6px;
+        }
+        .site-filter select {
+          max-width: 100px;
+          font-size: 11px;
+        }
         /* Grids → single column on small */
-        .g4 { grid-template-columns: 1fr 1fr; gap: 8px; }
-        .g5 { grid-template-columns: 1fr 1fr; gap: 8px; }
-        .kpi { padding: 10px 12px; }
-        .kpi-val { font-size: 18px; }
-        .kpi-lbl { font-size: 11px; }
-        .kpi-sub { display: none; }
+        .g4 {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .g5 {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .kpi {
+          padding: 10px 12px;
+        }
+        .kpi-val {
+          font-size: 18px;
+        }
+        .kpi-lbl {
+          font-size: 11px;
+        }
+        .kpi-sub {
+          display: none;
+        }
         /* Filter bar stacks vertically */
         .fbar {
           flex-direction: column;
           align-items: stretch;
           gap: 6px;
         }
-        .fbar .fi { width: 100% !important; min-width: unset; font-size: 13px; }
-        .fbar .btn { width: 100%; }
+        .fbar .fi {
+          width: 100% !important;
+          min-width: unset;
+          font-size: 13px;
+        }
+        .fbar .btn {
+          width: 100%;
+        }
         /* Tables: horizontal scroll */
-        .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { min-width: 520px; }
-        th, td { padding: 7px 8px; font-size: 11.5px; }
+        .tw {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        table {
+          min-width: 520px;
+        }
+        th,
+        td {
+          padding: 7px 8px;
+          font-size: 11.5px;
+        }
         /* Modal full-screen on mobile */
-        .modal-overlay { align-items: flex-end; padding: 0; }
+        .modal-overlay {
+          align-items: flex-end;
+          padding: 0;
+        }
         .modal {
           max-width: 100%;
           width: 100%;
@@ -471,51 +582,177 @@
           max-height: 92vh;
         }
         /* Modal rows → single column */
-        .row { grid-template-columns: 1fr; gap: 10px; }
-        .row.full { grid-template-columns: 1fr; }
-        .mb { padding: 14px; }
-        .mh { padding: 14px 16px; }
-        .mf { padding: 12px 14px; gap: 8px; }
-        .mf .btn { flex: 1; padding: 10px; font-size: 13px; }
+        .row {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .row.full {
+          grid-template-columns: 1fr;
+        }
+        .mb {
+          padding: 14px;
+        }
+        .mh {
+          padding: 14px 16px;
+        }
+        .mf {
+          padding: 12px 14px;
+          gap: 8px;
+        }
+        .mf .btn {
+          flex: 1;
+          padding: 10px;
+          font-size: 13px;
+        }
         /* Sidebar tweaks */
-        .sidebar { width: 240px; left: -250px; }
-        .sidebar.open { left: 0; }
-        .brand-info h3 { font-size: 13px; }
+        .sidebar {
+          width: 240px;
+          left: -250px;
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .brand-info h3 {
+          font-size: 13px;
+        }
         /* Cards */
-        .card { padding: 10px; border-radius: 8px; }
-        .sc { padding: 10px; }
-        .sv { font-size: 20px; }
-        .sr { font-size: 12px; }
-        .chbox { height: 140px; }
+        .card {
+          padding: 10px;
+          border-radius: 8px;
+        }
+        .sc {
+          padding: 10px;
+        }
+        .sv {
+          font-size: 20px;
+        }
+        .sr {
+          font-size: 12px;
+        }
+        .chbox {
+          height: 140px;
+        }
         /* Stat row */
-        .srow { flex-wrap: wrap; gap: 6px; }
-        .sp { min-width: 80px; padding: 8px 10px; flex: 1 1 calc(50% - 6px); }
-        .spv { font-size: 17px; }
-        .spl { font-size: 10px; }
+        .srow {
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .sp {
+          min-width: 80px;
+          padding: 8px 10px;
+          flex: 1 1 calc(50% - 6px);
+        }
+        .spv {
+          font-size: 17px;
+        }
+        .spl {
+          font-size: 10px;
+        }
         /* Master tabs */
-        .mtabs { gap: 4px; }
-        .mtab { padding: 7px 10px; font-size: 12px; }
+        .mtabs {
+          gap: 4px;
+        }
+        .mtab {
+          padding: 7px 10px;
+          font-size: 12px;
+        }
         /* Action buttons */
-        .btn-sm-edit, .btn-sm-danger { font-size: 10px; padding: 3px 7px; }
+        .btn-sm-edit,
+        .btn-sm-danger {
+          font-size: 10px;
+          padding: 3px 7px;
+        }
         /* KPI grid → 2 col */
-        .g4.kpi-grid { grid-template-columns: 1fr 1fr; }
+        .g4.kpi-grid {
+          grid-template-columns: 1fr 1fr;
+        }
         /* Auth box */
-        .auth-box { padding: 24px 18px; margin: 12px; }
+        .auth-box {
+          padding: 24px 18px;
+          margin: 12px;
+        }
         /* Toast */
-        .toast { bottom: 12px; right: 12px; left: 12px; font-size: 12px; }
+        .toast {
+          bottom: 12px;
+          right: 12px;
+          left: 12px;
+          font-size: 12px;
+        }
         /* g3 side card inline */
-        .sc .sl { font-size: 10px; }
+        .sc .sl {
+          font-size: 10px;
+        }
+      }
+      /* Charts — full width, taller on mobile */
+      .chbox {
+        height: 200px !important;
+        width: 100% !important;
+        overflow: hidden;
+      }
+      canvas {
+        max-width: 100% !important;
+      }
+      #trendChart,
+      #siteChart,
+      #labChart {
+        width: 100% !important;
+      }
+
+      /* g3 stack — stat card goes below chart */
+      .g3 > .sc {
+        order: 2;
+      }
+      .g3 > .card:first-child {
+        order: 1;
+      }
+
+      /* Stock section */
+      #stockList {
+        font-size: 12px;
+      }
+
+      /* Master tabs scroll */
+      .mtabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+      .mtab {
+        white-space: nowrap;
+      }
+
+      /* No-site banner */
+      #noSiteBanner {
+        font-size: 12px;
+        padding: 8px 12px;
       }
 
       /* ── RESPONSIVE: SMALL PHONES (≤380px) ── */
       @media (max-width: 380px) {
-        .g4 { grid-template-columns: 1fr 1fr; gap: 6px; }
-        .kpi-val { font-size: 16px; }
-        .kpi-lbl { font-size: 10px; }
-        .nav-item { padding: 9px 10px; font-size: 12.5px; }
-        th, td { font-size: 10.5px; padding: 6px 6px; }
-        .topbar { height: 46px; }
-        .page-title { font-size: 14px; }
+        .g4 {
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+        }
+        .kpi-val {
+          font-size: 16px;
+        }
+        .kpi-lbl {
+          font-size: 10px;
+        }
+        .nav-item {
+          padding: 9px 10px;
+          font-size: 12.5px;
+        }
+        th,
+        td {
+          font-size: 10.5px;
+          padding: 6px 6px;
+        }
+        .topbar {
+          height: 46px;
+        }
+        .page-title {
+          font-size: 14px;
+        }
       }
       .card {
         background: var(--white);
@@ -701,6 +938,12 @@
       .chbox {
         position: relative;
         height: 180px;
+        width: 100%;
+        overflow: hidden;
+      }
+      .chbox canvas {
+        max-width: 100% !important;
+        height: 100% !important;
       }
       /* ── MASTER TABS ── */
       .mtabs {
@@ -957,8 +1200,12 @@
       style="display: none; height: 100vh; display: none; flex-direction: row"
     >
       <!-- SIDEBAR -->
-      <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-    <div class="sidebar" id="sidebar">
+      <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+      ></div>
+      <div class="sidebar" id="sidebar">
         <div class="sidebar-brand">
           <div class="brand-av">C</div>
           <div class="brand-info">
@@ -1016,12 +1263,7 @@
       <div class="main">
         <div class="topbar">
           <div class="topbar-left">
-            <button
-              class="menu-btn"
-              onclick="toggleSidebar()"
-            >
-              ☰
-            </button>
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
             <div>
               <div class="page-title" id="pgT">Overview</div>
               <div class="page-bread" id="pgB">Dashboard › Overview</div>
@@ -1030,7 +1272,7 @@
           <div class="topbar-right">
             <div class="date-badge">📅 <span id="todayDate"></span></div>
             <div class="site-filter">
-              <select id="gSite" onchange="renderOverview()">
+              <select id="gSite" onchange="syncGlobalSite()">
                 <option value="">All Sites</option>
               </select>
             </div>
@@ -1106,7 +1348,14 @@
                 id="labDate"
                 onchange="renderLabour()"
               />
-              <select class="fi" id="labSite" onchange="renderLabour()">
+              <select
+                class="fi"
+                id="labSite"
+                onchange="
+                  document.getElementById('gSite').value = this.value;
+                  renderLabour();
+                "
+              >
                 <option value="">All Sites</option>
               </select>
               <select class="fi" id="labDes" onchange="renderLabour()">
@@ -1191,7 +1440,14 @@
           <!-- MATERIALS -->
           <div class="page" id="page-materials">
             <div class="fbar">
-              <select class="fi" id="matSite" onchange="renderMaterials()">
+              <select
+                class="fi"
+                id="matSite"
+                onchange="
+                  document.getElementById('gSite').value = this.value;
+                  renderMaterials();
+                "
+              >
                 <option value="">All Sites</option>
               </select>
               <select class="fi" id="matName" onchange="renderMaterials()">
@@ -1272,7 +1528,14 @@
           <!-- CASHBOOK -->
           <div class="page" id="page-cashbook">
             <div class="fbar">
-              <select class="fi" id="cashSite" onchange="renderCash()">
+              <select
+                class="fi"
+                id="cashSite"
+                onchange="
+                  document.getElementById('gSite').value = this.value;
+                  renderCash();
+                "
+              >
                 <option value="">All Sites</option>
               </select>
               <select class="fi" id="cashType" onchange="renderCash()">
@@ -1432,7 +1695,8 @@
                   id="btnAddSite"
                   onclick="
                     editId = null;
-                    document.getElementById('siteModalTitle').textContent = 'Add Site';
+                    document.getElementById('siteModalTitle').textContent =
+                      'Add Site';
                     populateSiteUserDropdowns();
                     openModal('siteModal');
                   "
@@ -1450,6 +1714,7 @@
                         <th>Address</th>
                         <th>Start Date</th>
                         <th>Supervisor</th>
+                        <th>Engineers</th>
                         <th>Phone</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -1469,7 +1734,14 @@
                   oninput="renderWorkers(this.value)"
                   style="flex: 1"
                 />
-                <select class="fi" id="wfSite" onchange="renderWorkers()">
+                <select
+                  class="fi"
+                  id="wfSite"
+                  onchange="
+                    document.getElementById('gSite').value = this.value;
+                    renderWorkers();
+                  "
+                >
                   <option value="">All Sites</option>
                 </select>
                 <select class="fi" id="wfDes" onchange="renderWorkers()">
@@ -1603,9 +1875,26 @@
           </div>
           <div class="row full">
             <div>
-              <label>Assign Engineers <small style="font-weight:400;color:var(--muted)">(Ctrl/Cmd = multi-select)</small></label>
-              <select id="s_engineers" multiple style="height:90px;width:100%;padding:6px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:#fff">
-              </select>
+              <label
+                >Assign Engineers
+                <small style="font-weight: 400; color: var(--muted)"
+                  >(Ctrl/Cmd = multi-select)</small
+                ></label
+              >
+              <select
+                id="s_engineers"
+                multiple
+                style="
+                  height: 90px;
+                  width: 100%;
+                  padding: 6px;
+                  border: 1.5px solid var(--border);
+                  border-radius: 8px;
+                  font-size: 13px;
+                  outline: none;
+                  background: #fff;
+                "
+              ></select>
             </div>
           </div>
         </div>
@@ -1972,13 +2261,18 @@
           (user.user_metadata && user.user_metadata.fullname) ||
           (user.user_metadata && user.user_metadata.full_name) ||
           user.email.split("@")[0]
-        ).toLowerCase().trim();
+        )
+          .toLowerCase()
+          .trim();
 
         // Fetch ALL sites (bypass allowedSiteIds filter) to calculate access
         const { data: sites } = await sb
           .from("sites")
           .select("id, supervisor, supervisorid, engineerids");
-        if (!sites || sites.length === 0) { allowedSiteIds = []; return; }
+        if (!sites || sites.length === 0) {
+          allowedSiteIds = [];
+          return;
+        }
 
         if (currentRole === "supervisor") {
           allowedSiteIds = sites
@@ -1986,7 +2280,11 @@
               // Match by UUID (new sites)
               if (s.supervisorid && s.supervisorid === uid) return true;
               // Fallback: match by supervisor name text (old sites)
-              if (s.supervisor && s.supervisor.toLowerCase().trim() === userName) return true;
+              if (
+                s.supervisor &&
+                s.supervisor.toLowerCase().trim() === userName
+              )
+                return true;
               return false;
             })
             .map((s) => s.id);
@@ -1994,7 +2292,8 @@
           allowedSiteIds = sites
             .filter((s) => {
               // Match by UUID array (new sites)
-              if (Array.isArray(s.engineerids) && s.engineerids.includes(uid)) return true;
+              if (Array.isArray(s.engineerids) && s.engineerids.includes(uid))
+                return true;
               return false;
             })
             .map((s) => s.id);
@@ -2239,12 +2538,17 @@
         applyRoleVisibility();
         await loadAllowedSites(user);
         // Auto-create profile entry if missing (handles pre-profiles-table users)
-        sb.from("profiles").upsert({
-          id: user.id,
-          full_name: name,
-          role: currentRole,
-          email: user.email,
-        }, { onConflict: "id" }).then(() => {});
+        sb.from("profiles")
+          .upsert(
+            {
+              id: user.id,
+              full_name: name,
+              role: currentRole,
+              email: user.email,
+            },
+            { onConflict: "id" },
+          )
+          .then(() => {});
         initDashboard();
       }
 
@@ -2575,10 +2879,13 @@
         const supEl = document.getElementById("s_sup");
         const engEl = document.getElementById("s_engineers");
         // Sanitize: ensure empty string becomes null for UUID fields
-        const supervisorId = (supEl.value && supEl.value.trim() !== "") ? supEl.value.trim() : null;
+        const supervisorId =
+          supEl.value && supEl.value.trim() !== "" ? supEl.value.trim() : null;
         const supervisorName =
           supervisorId && supEl.selectedIndex >= 0
-            ? (supEl.options[supEl.selectedIndex]?.text || "").replace("-- Select Supervisor --", "").trim()
+            ? (supEl.options[supEl.selectedIndex]?.text || "")
+                .replace("-- Select Supervisor --", "")
+                .trim()
             : "";
         // Filter out empty strings from engineer IDs
         const engineerIds = engEl
@@ -2629,15 +2936,18 @@
           supEl.value = s.supervisorid;
           // fallback: if uuid not found in dropdown, try matching by name
           if (!supEl.value && s.supervisor) {
-            Array.from(supEl.options).forEach(opt => {
-              if (opt.text.trim().toLowerCase() === s.supervisor.trim().toLowerCase())
+            Array.from(supEl.options).forEach((opt) => {
+              if (
+                opt.text.trim().toLowerCase() ===
+                s.supervisor.trim().toLowerCase()
+              )
                 opt.selected = true;
             });
           }
         }
         const engEl = document.getElementById("s_engineers");
         if (engEl && s.engineerids && Array.isArray(s.engineerids)) {
-          Array.from(engEl.options).forEach(opt => {
+          Array.from(engEl.options).forEach((opt) => {
             opt.selected = s.engineerids.includes(opt.value);
           });
         }
@@ -2645,10 +2955,20 @@
       }
       async function deleteSite(id) {
         if (!guard("canDeleteSite", "Admin only")) return;
-        if (!confirm("Delete this site?\nAll linked workers, attendance, material entries and cashbook records will be unlinked.")) return;
+        if (
+          !confirm(
+            "Delete this site?\nAll linked workers, attendance, material entries and cashbook records will be unlinked.",
+          )
+        )
+          return;
         try {
           // Unlink all FK-referencing tables before deleting site
-          const tables = ["workers", "attendance", "material_entries", "cashbook"];
+          const tables = [
+            "workers",
+            "attendance",
+            "material_entries",
+            "cashbook",
+          ];
           for (const tbl of tables) {
             const { error } = await sb
               .from(tbl)
@@ -3053,7 +3373,11 @@
       async function renderOverview() {
         const gSite = document.getElementById("gSite").value;
         const gSiteName = gSite
-          ? (document.getElementById("gSite")?.options[document.getElementById("gSite")?.selectedIndex]?.text || "").trim()
+          ? (
+              document.getElementById("gSite")?.options[
+                document.getElementById("gSite")?.selectedIndex
+              ]?.text || ""
+            ).trim()
           : "";
 
         const [sites, attend, mats, cash] = await Promise.all([
@@ -3067,45 +3391,85 @@
         // Helper: does a record belong to selected site?
         function matchSite(rec) {
           if (!gSite) return true;
-          return rec.site_id === gSite || (rec.site_name && rec.site_name.trim() === gSiteName);
+          return (
+            rec.site_id === gSite ||
+            (rec.site_name && rec.site_name.trim() === gSiteName)
+          );
         }
 
         // Filter all data by selected site upfront
-        const filtSites  = gSite ? sites.filter((s) => s.id === gSite || s.name === gSiteName) : sites;
+        const filtSites = gSite
+          ? sites.filter((s) => s.id === gSite || s.name === gSiteName)
+          : sites;
         const filtAttend = attend.filter(matchSite);
-        const filtMats   = mats.filter(matchSite);
-        const filtCash   = cash.filter(matchSite);
+        const filtMats = mats.filter(matchSite);
+        const filtCash = cash.filter(matchSite);
 
         // ── KPIs ──
-        document.getElementById("ov-sites").textContent =
-          filtSites.filter((s) => s.status === "Active").length;
+        document.getElementById("ov-sites").textContent = filtSites.filter(
+          (s) => s.status === "Active",
+        ).length;
 
         const todayLab = filtAttend.filter((a) => a.date === today);
-        document.getElementById("ov-labour").textContent =
-          fmt(todayLab.reduce((s, a) => s + (a.pay || 0), 0));
+        document.getElementById("ov-labour").textContent = fmt(
+          todayLab.reduce((s, a) => s + (a.pay || 0), 0),
+        );
         document.getElementById("ov-present").textContent =
-          todayLab.filter((a) => a.status === "Present").length + " present today";
+          todayLab.filter((a) => a.status === "Present").length +
+          " present today";
 
-        document.getElementById("ov-mat").textContent =
-          fmt(filtMats.filter((m) => m.type === "In").reduce((s, m) => s + (m.amount || 0), 0));
+        document.getElementById("ov-mat").textContent = fmt(
+          filtMats
+            .filter((m) => m.type === "In")
+            .reduce((s, m) => s + (m.amount || 0), 0),
+        );
 
-        const sent = filtCash.filter((c) => c.type === "Money Sent").reduce((s, c) => s + (c.amount || 0), 0);
-        const exp  = filtCash.filter((c) => c.type === "Expense").reduce((s, c) => s + (c.amount || 0), 0);
-        const bal  = sent - exp;
-        const bEl  = document.getElementById("ov-cash");
-        bEl.textContent   = fmt(Math.abs(bal));
-        bEl.style.color   = bal >= 0 ? "var(--success)" : "var(--danger)";
+        const sent = filtCash
+          .filter((c) => c.type === "Money Sent")
+          .reduce((s, c) => s + (c.amount || 0), 0);
+        const exp = filtCash
+          .filter((c) => c.type === "Expense")
+          .reduce((s, c) => s + (c.amount || 0), 0);
+        const bal = sent - exp;
+        const bEl = document.getElementById("ov-cash");
+        bEl.textContent = fmt(Math.abs(bal));
+        bEl.style.color = bal >= 0 ? "var(--success)" : "var(--danger)";
 
         // ── Site Summary Table (filtered) ──
-        const sc = { Active: "bg-green", "On Hold": "bg-orange", Completed: "bg-gray" };
+        const sc = {
+          Active: "bg-green",
+          "On Hold": "bg-orange",
+          Completed: "bg-gray",
+        };
         document.getElementById("ovTable").innerHTML =
-          filtSites.map((s) => {
-            const sL    = attend.filter((a) => a.site_id === s.id || a.site_name === s.name).reduce((t, a) => t + (a.pay || 0), 0);
-            const sM    = mats.filter((m) => (m.site_id === s.id || m.site_name === s.name) && m.type === "In").reduce((t, m) => t + (m.amount || 0), 0);
-            const sSent = cash.filter((c) => (c.site_id === s.id || c.site_name === s.name) && c.type === "Money Sent").reduce((t, c) => t + (c.amount || 0), 0);
-            const sExp  = cash.filter((c) => (c.site_id === s.id || c.site_name === s.name) && c.type === "Expense").reduce((t, c) => t + (c.amount || 0), 0);
-            const sBal  = sSent - sExp;
-            return `<tr>
+          filtSites
+            .map((s) => {
+              const sL = attend
+                .filter((a) => a.site_id === s.id || a.site_name === s.name)
+                .reduce((t, a) => t + (a.pay || 0), 0);
+              const sM = mats
+                .filter(
+                  (m) =>
+                    (m.site_id === s.id || m.site_name === s.name) &&
+                    m.type === "In",
+                )
+                .reduce((t, m) => t + (m.amount || 0), 0);
+              const sSent = cash
+                .filter(
+                  (c) =>
+                    (c.site_id === s.id || c.site_name === s.name) &&
+                    c.type === "Money Sent",
+                )
+                .reduce((t, c) => t + (c.amount || 0), 0);
+              const sExp = cash
+                .filter(
+                  (c) =>
+                    (c.site_id === s.id || c.site_name === s.name) &&
+                    c.type === "Expense",
+                )
+                .reduce((t, c) => t + (c.amount || 0), 0);
+              const sBal = sSent - sExp;
+              return `<tr>
               <td><strong>${s.name}</strong></td>
               <td>${s.supervisor || "–"}</td>
               <td>${fmt(sL)}</td><td>${fmt(sM)}</td>
@@ -3113,8 +3477,9 @@
               <td style="color:${sBal >= 0 ? "var(--success)" : "var(--danger)"}">${fmt(sBal)}</td>
               <td><span class="badge ${sc[s.status] || "bg-gray"}">${s.status}</span></td>
             </tr>`;
-          }).join("") ||
-          '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No sites yet.</td></tr>';
+            })
+            .join("") ||
+          '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">No sites yet.</td></tr>';
 
         // ── Trend Chart — last 7 days (filtered) ──
         const days = [];
@@ -3123,38 +3488,67 @@
           days.push(d.toISOString().split("T")[0]);
         }
         const dData = days.map((d) =>
-          filtAttend.filter((a) => a.date === d).reduce((s, a) => s + (a.pay || 0), 0)
+          filtAttend
+            .filter((a) => a.date === d)
+            .reduce((s, a) => s + (a.pay || 0), 0),
         );
         if (trendChart2) trendChart2.destroy();
-        trendChart2 = new Chart(document.getElementById("trendChart").getContext("2d"), {
-          type: "line",
-          data: {
-            labels: days.map((d) => d.slice(5)),
-            datasets: [{ label: "Labour Cost", data: dData,
-              borderColor: "#f97316", backgroundColor: "rgba(249,115,22,.1)",
-              fill: true, tension: 0.4 }],
+        trendChart2 = new Chart(
+          document.getElementById("trendChart").getContext("2d"),
+          {
+            type: "line",
+            data: {
+              labels: days.map((d) => d.slice(5)),
+              datasets: [
+                {
+                  label: "Labour Cost",
+                  data: dData,
+                  borderColor: "#f97316",
+                  backgroundColor: "rgba(249,115,22,.1)",
+                  fill: true,
+                  tension: 0.4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } },
+            },
           },
-          options: { responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
-        });
+        );
 
         // ── Site Bar Chart (filtered sites) ──
         const siteCosts = filtSites.map((s) => ({
           name: s.name,
-          cost: attend.filter((a) => a.site_id === s.id || a.site_name === s.name)
-                      .reduce((t, a) => t + (a.pay || 0), 0),
+          cost: attend
+            .filter((a) => a.site_id === s.id || a.site_name === s.name)
+            .reduce((t, a) => t + (a.pay || 0), 0),
         }));
         if (siteChart2) siteChart2.destroy();
-        siteChart2 = new Chart(document.getElementById("siteChart").getContext("2d"), {
-          type: "bar",
-          data: {
-            labels: siteCosts.map((s) => s.name),
-            datasets: [{ label: "Labour Cost", data: siteCosts.map((s) => s.cost),
-              backgroundColor: "#f97316" }],
+        siteChart2 = new Chart(
+          document.getElementById("siteChart").getContext("2d"),
+          {
+            type: "bar",
+            data: {
+              labels: siteCosts.map((s) => s.name),
+              datasets: [
+                {
+                  label: "Labour Cost",
+                  data: siteCosts.map((s) => s.cost),
+                  backgroundColor: "#f97316",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } },
+            },
           },
-          options: { responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
-        });
+        );
       }
 
       // ════════════ RENDER LABOUR ════════════
@@ -3166,10 +3560,21 @@
         let E = await dbGet("attendance");
         if (date) E = E.filter((e) => e.date === date);
         if (site) {
-          const _sName = (document.getElementById("labSite")?.options[document.getElementById("labSite")?.selectedIndex]?.text || "").trim();
-          E = E.filter((e) => e.site_id === site || (e.site_name && e.site_name.trim() === _sName));
+          const _sName = (
+            document.getElementById("labSite")?.options[
+              document.getElementById("labSite")?.selectedIndex
+            ]?.text || ""
+          ).trim();
+          E = E.filter(
+            (e) =>
+              e.site_id === site ||
+              (e.site_name && e.site_name.trim() === _sName),
+          );
         }
-        if (des) E = E.filter((e) => (e.designation || "").toLowerCase() === des.toLowerCase());
+        if (des)
+          E = E.filter(
+            (e) => (e.designation || "").toLowerCase() === des.toLowerCase(),
+          );
         if (search)
           E = E.filter((e) =>
             (e.worker_name || "").toLowerCase().includes(search),
@@ -3262,10 +3667,21 @@
         const search = document.getElementById("matSearch").value.toLowerCase();
         let E = await dbGet("material_entries");
         if (site) {
-          const _sName = (document.getElementById("matSite")?.options[document.getElementById("matSite")?.selectedIndex]?.text || "").trim();
-          E = E.filter((e) => e.site_id === site || (e.site_name && e.site_name.trim() === _sName));
+          const _sName = (
+            document.getElementById("matSite")?.options[
+              document.getElementById("matSite")?.selectedIndex
+            ]?.text || ""
+          ).trim();
+          E = E.filter(
+            (e) =>
+              e.site_id === site ||
+              (e.site_name && e.site_name.trim() === _sName),
+          );
         }
-        if (name) E = E.filter((e) => (e.material_name || "").toLowerCase() === name.toLowerCase());
+        if (name)
+          E = E.filter(
+            (e) => (e.material_name || "").toLowerCase() === name.toLowerCase(),
+          );
         if (type) E = E.filter((e) => e.type === type);
         if (date) E = E.filter((e) => e.date === date);
         if (search)
@@ -3307,8 +3723,15 @@
         // Stock summary — filtered by selected site
         let allE = await dbGet("material_entries");
         if (site) {
-          const _sn = (document.getElementById("matSite")?.options[document.getElementById("matSite")?.selectedIndex]?.text || "").trim();
-          allE = allE.filter((e) => e.site_id === site || (e.site_name && e.site_name.trim() === _sn));
+          const _sn = (
+            document.getElementById("matSite")?.options[
+              document.getElementById("matSite")?.selectedIndex
+            ]?.text || ""
+          ).trim();
+          allE = allE.filter(
+            (e) =>
+              e.site_id === site || (e.site_name && e.site_name.trim() === _sn),
+          );
         }
         const mMast = await dbGet("materials_master");
         document.getElementById("stockList").innerHTML =
@@ -3338,8 +3761,16 @@
           search = document.getElementById("cashSearch").value.toLowerCase();
         let E = await dbGet("cashbook");
         if (site) {
-          const _sName = (document.getElementById("cashSite")?.options[document.getElementById("cashSite")?.selectedIndex]?.text || "").trim();
-          E = E.filter((e) => e.site_id === site || (e.site_name && e.site_name.trim() === _sName));
+          const _sName = (
+            document.getElementById("cashSite")?.options[
+              document.getElementById("cashSite")?.selectedIndex
+            ]?.text || ""
+          ).trim();
+          E = E.filter(
+            (e) =>
+              e.site_id === site ||
+              (e.site_name && e.site_name.trim() === _sName),
+          );
         }
         if (type) E = E.filter((e) => e.type === type);
         if (head) E = E.filter((e) => e.head === head);
@@ -3425,7 +3856,9 @@
           S.map(
             (s, i) => `<tr>
     <td>${String(i + 1).padStart(3, "0")}</td><td><strong>${s.name}</strong></td><td>${s.addr || ""}</td>
-    <td>${s.start_date || ""}</td><td>${s.supervisor || ""}</td><td>${s.phone || ""}</td>
+    <td>${s.start_date || ""}</td><td>${s.supervisor || "–"}</td>
+    <td style="font-size:11px;color:var(--muted)">${Array.isArray(s.engineerids) && s.engineerids.length > 0 ? s.engineerids.length + " assigned" : "–"}</td>
+    <td>${s.phone || ""}</td>
     <td><span class="badge ${sc[s.status] || "bg-gray"}">${s.status}</span></td>
     <td style="white-space:nowrap">${canEdit ? `<button class="btn-sm-edit" onclick="editSite('${s.id}')">Edit</button>` : ""}${canDel ? `<button class="btn-sm-danger" onclick="deleteSite('${s.id}')">Delete</button>` : ""}</td>
   </tr>`,
@@ -3483,6 +3916,21 @@
       }
 
       // ── NAVIGATION ──
+      // ── GLOBAL SITE SYNC ──
+      function syncGlobalSite() {
+        const val = document.getElementById("gSite").value;
+        // Push to all page-level site dropdowns
+        ["labSite", "matSite", "cashSite", "wfSite"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = val;
+        });
+        renderOverview();
+        renderLabour();
+        renderMaterials();
+        renderCash();
+        renderWorkers();
+      }
+
       function showPage(id, el) {
         if (window.innerWidth <= 900) closeSidebar();
         document
