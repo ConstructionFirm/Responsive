@@ -2180,26 +2180,54 @@
           return;
         }
         const uid = user.id;
+        const userName = (
+          (user.user_metadata && user.user_metadata.fullname) ||
+          (user.user_metadata && user.user_metadata.full_name) ||
+          user.email.split("@")[0]
+        )
+          .toLowerCase()
+          .trim();
+
+        // Fetch ALL sites (bypass allowedSiteIds filter) to calculate access
         const { data: sites } = await sb
           .from("sites")
-          .select("id, supervisorid, engineerids");
-        if (!sites) {
+          .select("id, supervisor, supervisorid, engineerids");
+        if (!sites || sites.length === 0) {
           allowedSiteIds = [];
           return;
         }
+
         if (currentRole === "supervisor") {
           allowedSiteIds = sites
-            .filter((s) => s.supervisorid === uid)
+            .filter((s) => {
+              // Match by UUID (new sites)
+              if (s.supervisorid && s.supervisorid === uid) return true;
+              // Fallback: match by supervisor name text (old sites)
+              if (
+                s.supervisor &&
+                s.supervisor.toLowerCase().trim() === userName
+              )
+                return true;
+              return false;
+            })
             .map((s) => s.id);
         } else if (currentRole === "engineer") {
           allowedSiteIds = sites
-            .filter(
-              (s) =>
-                Array.isArray(s.engineerids) && s.engineerids.includes(uid),
-            )
+            .filter((s) => {
+              // Match by UUID array (new sites)
+              if (Array.isArray(s.engineerids) && s.engineerids.includes(uid))
+                return true;
+              return false;
+            })
             .map((s) => s.id);
         } else {
           allowedSiteIds = null;
+        }
+
+        // If still no sites found, warn but don't lock out completely
+        // (admin should assign sites to this user)
+        if (allowedSiteIds !== null && allowedSiteIds.length === 0) {
+          console.warn("No sites assigned to this user:", userName, uid);
         }
       }
       let labChart2, siteChart2, trendChart2;
@@ -2495,6 +2523,24 @@
           const el = document.getElementById(id);
           if (el) el.value = td;
         });
+        // Show warning if supervisor/engineer has no assigned sites
+        const existing = document.getElementById("noSiteBanner");
+        if (allowedSiteIds !== null && allowedSiteIds.length === 0) {
+          if (!existing) {
+            const banner = document.createElement("div");
+            banner.id = "noSiteBanner";
+            banner.style.cssText =
+              "background:#fef3c7;color:#92400e;padding:10px 20px;" +
+              "font-size:13px;font-weight:600;text-align:center;" +
+              "border-bottom:2px solid #f59e0b;flex-shrink:0;";
+            banner.textContent =
+              "⚠️ You have not been assigned to any site yet. Ask your Admin to assign you via Masters → Sites → Edit.";
+            const main = document.querySelector(".main");
+            if (main) main.prepend(banner);
+          }
+        } else if (existing) {
+          existing.remove();
+        }
         populateAllDropdowns();
         renderAll();
       }
