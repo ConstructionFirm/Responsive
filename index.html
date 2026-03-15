@@ -3052,6 +3052,10 @@
       // ════════════ RENDER OVERVIEW ════════════
       async function renderOverview() {
         const gSite = document.getElementById("gSite").value;
+        const gSiteName = gSite
+          ? (document.getElementById("gSite")?.options[document.getElementById("gSite")?.selectedIndex]?.text || "").trim()
+          : "";
+
         const [sites, attend, mats, cash] = await Promise.all([
           dbGet("sites"),
           dbGet("attendance"),
@@ -3059,138 +3063,98 @@
           dbGet("cashbook"),
         ]);
         const today = getToday();
-        document.getElementById("ov-sites").textContent = sites.filter(
-          (s) => s.status === "Active",
-        ).length;
-        const todayLab = attend.filter(
-          (a) => {
-            const _n = (document.getElementById("gSite")?.options[document.getElementById("gSite")?.selectedIndex]?.text || "").trim();
-            return a.date === today && (!gSite || a.site_id === gSite || (a.site_name && a.site_name.trim() === _n));
-          },
-        );
-        const labCost = todayLab.reduce((s, a) => s + (a.pay || 0), 0);
-        document.getElementById("ov-labour").textContent = fmt(labCost);
-        document.getElementById("ov-present").textContent =
-          todayLab.filter((a) => a.status === "Present").length +
-          " present today";
-        const matIn = mats
-          .filter((m) => {
-            const _n = (document.getElementById("gSite")?.options[document.getElementById("gSite")?.selectedIndex]?.text || "").trim();
-            return m.type === "In" && (!gSite || m.site_id === gSite || (m.site_name && m.site_name.trim() === _n));
-          })
-          .reduce((s, m) => s + (m.amount || 0), 0);
-        document.getElementById("ov-mat").textContent = fmt(matIn);
-        const cashD = cash.filter((c) => {
-          const _n = (document.getElementById("gSite")?.options[document.getElementById("gSite")?.selectedIndex]?.text || "").trim();
-          return !gSite || c.site_id === gSite || (c.site_name && c.site_name.trim() === _n);
-        });
-        const bal =
-          cashD
-            .filter((c) => c.type === "Money Sent")
-            .reduce((s, c) => s + (c.amount || 0), 0) -
-          cashD
-            .filter((c) => c.type === "Expense")
-            .reduce((s, c) => s + (c.amount || 0), 0);
-        const bEl = document.getElementById("ov-cash");
-        bEl.textContent = fmt(Math.abs(bal));
-        bEl.style.color = bal >= 0 ? "var(--success)" : "var(--danger)";
 
-        // Site Summary Table
+        // Helper: does a record belong to selected site?
+        function matchSite(rec) {
+          if (!gSite) return true;
+          return rec.site_id === gSite || (rec.site_name && rec.site_name.trim() === gSiteName);
+        }
+
+        // Filter all data by selected site upfront
+        const filtSites  = gSite ? sites.filter((s) => s.id === gSite || s.name === gSiteName) : sites;
+        const filtAttend = attend.filter(matchSite);
+        const filtMats   = mats.filter(matchSite);
+        const filtCash   = cash.filter(matchSite);
+
+        // ── KPIs ──
+        document.getElementById("ov-sites").textContent =
+          filtSites.filter((s) => s.status === "Active").length;
+
+        const todayLab = filtAttend.filter((a) => a.date === today);
+        document.getElementById("ov-labour").textContent =
+          fmt(todayLab.reduce((s, a) => s + (a.pay || 0), 0));
+        document.getElementById("ov-present").textContent =
+          todayLab.filter((a) => a.status === "Present").length + " present today";
+
+        document.getElementById("ov-mat").textContent =
+          fmt(filtMats.filter((m) => m.type === "In").reduce((s, m) => s + (m.amount || 0), 0));
+
+        const sent = filtCash.filter((c) => c.type === "Money Sent").reduce((s, c) => s + (c.amount || 0), 0);
+        const exp  = filtCash.filter((c) => c.type === "Expense").reduce((s, c) => s + (c.amount || 0), 0);
+        const bal  = sent - exp;
+        const bEl  = document.getElementById("ov-cash");
+        bEl.textContent   = fmt(Math.abs(bal));
+        bEl.style.color   = bal >= 0 ? "var(--success)" : "var(--danger)";
+
+        // ── Site Summary Table (filtered) ──
+        const sc = { Active: "bg-green", "On Hold": "bg-orange", Completed: "bg-gray" };
         document.getElementById("ovTable").innerHTML =
-          sites
-            .map((s) => {
-              const sL = attend
-                .filter((a) => a.site_id === s.id)
-                .reduce((t, a) => t + (a.pay || 0), 0);
-              const sM = mats
-                .filter((m) => m.site_id === s.id && m.type === "In")
-                .reduce((t, m) => t + (m.amount || 0), 0);
-              const sSent = cash
-                .filter((c) => c.site_id === s.id && c.type === "Money Sent")
-                .reduce((t, c) => t + (c.amount || 0), 0);
-              const sExp = cash
-                .filter((c) => c.site_id === s.id && c.type === "Expense")
-                .reduce((t, c) => t + (c.amount || 0), 0);
-              const sBal = sSent - sExp;
-              const sc = {
-                Active: "bg-green",
-                "On Hold": "bg-orange",
-                Completed: "bg-gray",
-              };
-              return `<tr><td><strong>${s.name}</strong></td><td>${s.supervisor || "–"}</td><td>${fmt(sL)}</td><td>${fmt(sM)}</td><td>${fmt(sSent)}</td><td>${fmt(sExp)}</td><td style="color:${sBal >= 0 ? "var(--success)" : "var(--danger)"}">${fmt(sBal)}</td><td><span class="badge ${sc[s.status] || "bg-gray"}">${s.status}</span></td></tr>`;
-            })
-            .join("") ||
+          filtSites.map((s) => {
+            const sL    = attend.filter((a) => a.site_id === s.id || a.site_name === s.name).reduce((t, a) => t + (a.pay || 0), 0);
+            const sM    = mats.filter((m) => (m.site_id === s.id || m.site_name === s.name) && m.type === "In").reduce((t, m) => t + (m.amount || 0), 0);
+            const sSent = cash.filter((c) => (c.site_id === s.id || c.site_name === s.name) && c.type === "Money Sent").reduce((t, c) => t + (c.amount || 0), 0);
+            const sExp  = cash.filter((c) => (c.site_id === s.id || c.site_name === s.name) && c.type === "Expense").reduce((t, c) => t + (c.amount || 0), 0);
+            const sBal  = sSent - sExp;
+            return `<tr>
+              <td><strong>${s.name}</strong></td>
+              <td>${s.supervisor || "–"}</td>
+              <td>${fmt(sL)}</td><td>${fmt(sM)}</td>
+              <td>${fmt(sSent)}</td><td>${fmt(sExp)}</td>
+              <td style="color:${sBal >= 0 ? "var(--success)" : "var(--danger)"}">${fmt(sBal)}</td>
+              <td><span class="badge ${sc[s.status] || "bg-gray"}">${s.status}</span></td>
+            </tr>`;
+          }).join("") ||
           '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No sites yet.</td></tr>';
 
-        // Trend Chart (last 7 days)
+        // ── Trend Chart — last 7 days (filtered) ──
         const days = [];
         for (let i = 6; i >= 0; i--) {
           const d = new Date(new Date().getTime() - i * 86400000);
           days.push(d.toISOString().split("T")[0]);
         }
-        const dLabels = days.map((d) => d.slice(5));
         const dData = days.map((d) =>
-          attend
-            .filter((a) => a.date === d)
-            .reduce((s, a) => s + (a.pay || 0), 0),
+          filtAttend.filter((a) => a.date === d).reduce((s, a) => s + (a.pay || 0), 0)
         );
         if (trendChart2) trendChart2.destroy();
-        trendChart2 = new Chart(
-          document.getElementById("trendChart").getContext("2d"),
-          {
-            type: "line",
-            data: {
-              labels: dLabels,
-              datasets: [
-                {
-                  label: "Labour Cost",
-                  data: dData,
-                  borderColor: "#f97316",
-                  backgroundColor: "rgba(249,115,22,.1)",
-                  fill: true,
-                  tension: 0.4,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } },
-            },
+        trendChart2 = new Chart(document.getElementById("trendChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: days.map((d) => d.slice(5)),
+            datasets: [{ label: "Labour Cost", data: dData,
+              borderColor: "#f97316", backgroundColor: "rgba(249,115,22,.1)",
+              fill: true, tension: 0.4 }],
           },
-        );
+          options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+        });
 
-        // Site Bar Chart
-        const siteCosts = sites.map((s) => ({
+        // ── Site Bar Chart (filtered sites) ──
+        const siteCosts = filtSites.map((s) => ({
           name: s.name,
-          cost: attend
-            .filter((a) => a.site_id === s.id)
-            .reduce((t, a) => t + (a.pay || 0), 0),
+          cost: attend.filter((a) => a.site_id === s.id || a.site_name === s.name)
+                      .reduce((t, a) => t + (a.pay || 0), 0),
         }));
         if (siteChart2) siteChart2.destroy();
-        siteChart2 = new Chart(
-          document.getElementById("siteChart").getContext("2d"),
-          {
-            type: "bar",
-            data: {
-              labels: siteCosts.map((s) => s.name),
-              datasets: [
-                {
-                  label: "Labour Cost",
-                  data: siteCosts.map((s) => s.cost),
-                  backgroundColor: "#f97316",
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } },
-            },
+        siteChart2 = new Chart(document.getElementById("siteChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: siteCosts.map((s) => s.name),
+            datasets: [{ label: "Labour Cost", data: siteCosts.map((s) => s.cost),
+              backgroundColor: "#f97316" }],
           },
-        );
+          options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+        });
       }
 
       // ════════════ RENDER LABOUR ════════════
