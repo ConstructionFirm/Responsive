@@ -3570,6 +3570,7 @@
 
         // Stock summary
         const allE = await dbGet("material_entries");
+        if (site) allE = allE.filter((e) => e.site_id === site);
         const mMast = await dbGet("materials_master");
         document.getElementById("stockList").innerHTML =
           mMast
