@@ -366,42 +366,54 @@
             </div>`).join('') : '<div class="mobile-empty">No materials found.</div>';
         }
 
-        const wrapAsync = (name, fn) => {
+        const mobileHooksApplied = new Set();
+
+        const wrapAsyncWhenReady = (name, fn) => {
+          if (mobileHooksApplied.has(name)) return true;
           const original = window[name];
-          if (typeof original !== 'function') return;
+          if (typeof original !== 'function') return false;
+
           window[name] = async function (...args) {
             const out = await original.apply(this, args);
             try { await fn(); } catch (e) { console.error(e); }
             return out;
           };
+
+          mobileHooksApplied.add(name);
+          return true;
         };
 
-        wrapAsync('renderLabour', renderLabourMobileUI);
-        wrapAsync('renderMaterials', renderMaterialsMobileUI);
-        wrapAsync('renderCash', renderCashMobileUI);
-        wrapAsync('renderSites', renderSitesMobileUI);
-        wrapAsync('renderWorkers', renderWorkersMobileUI);
-        wrapAsync('renderMatMaster', renderMatMasterMobileUI);
-
-        window.addEventListener('resize', () => {
+        const renderAllMobileViews = () => {
           renderLabourMobileUI();
           renderMaterialsMobileUI();
           renderCashMobileUI();
           renderSitesMobileUI();
           renderWorkersMobileUI();
           renderMatMasterMobileUI();
-        });
+        };
 
-        document.addEventListener('DOMContentLoaded', () => {
-          setTimeout(() => {
-            renderLabourMobileUI();
-            renderMaterialsMobileUI();
-            renderCashMobileUI();
-            renderSitesMobileUI();
-            renderWorkersMobileUI();
-            renderMatMasterMobileUI();
-          }, 300);
-        });
+        const applyMobileHooks = () => {
+          const ok = [
+            wrapAsyncWhenReady('renderLabour', renderLabourMobileUI),
+            wrapAsyncWhenReady('renderMaterials', renderMaterialsMobileUI),
+            wrapAsyncWhenReady('renderCash', renderCashMobileUI),
+            wrapAsyncWhenReady('renderSites', renderSitesMobileUI),
+            wrapAsyncWhenReady('renderWorkers', renderWorkersMobileUI),
+            wrapAsyncWhenReady('renderMatMaster', renderMatMasterMobileUI),
+          ];
+
+          if (ok.every(Boolean)) {
+            renderAllMobileViews();
+            return;
+          }
+
+          setTimeout(applyMobileHooks, 200);
+        };
+
+        window.addEventListener('load', applyMobileHooks);
+        window.addEventListener('resize', renderAllMobileViews);
+
+
       })();
       // === END MOBILE UI REFRESH PATCH ===
 
