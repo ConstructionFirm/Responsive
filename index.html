@@ -5,417 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RamaConstruction – Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-      // === MOBILE UI REFRESH PATCH ===
-      (function () {
-        const isPhoneView = () => window.innerWidth <= 600;
-        const esc = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-        const selectedText = (id) => {
-          const el = document.getElementById(id);
-          return (el?.options?.[el.selectedIndex]?.text || "").trim();
-        };
-        const fmtDate = (v) => v || "";
-        const padCode = (n) => `# ${String(n).padStart(3, '0')}`;
-        const ensureMobileBox = (parent, id, beforeEl) => {
-          let el = document.getElementById(id);
-          if (!el) {
-            el = document.createElement('div');
-            el.id = id;
-            el.className = 'mobile-alt-view';
-            if (beforeEl) parent.insertBefore(el, beforeEl); else parent.appendChild(el);
-          }
-          return el;
-        };
-        const initials = (name) => {
-          const parts = String(name || '?').trim().split(/\s+/).filter(Boolean);
-          return (parts[0]?.[0] || '?').toUpperCase();
-        };
-        const statusBadgeClass = (status) => ({ Present: 'bg-green', 'Half Day': 'bg-orange', Absent: 'bg-red', Leave: 'bg-gray', Active: 'bg-green', Inactive: 'bg-gray', Completed: 'bg-blue', 'On Hold': 'bg-orange' }[status] || 'bg-gray');
-        const siteMatch = (entry, siteId, selectId) => {
-          if (!siteId) return true;
-          const sName = selectedText(selectId);
-          return entry.site_id === siteId || (entry.site_name && entry.site_name.trim() === sName) || (entry.sitename && entry.sitename.trim() === sName);
-        };
-        const actionBtns = (editJs, deleteJs, canEdit, canDel) => {
-          const out = [];
-          if (canEdit) out.push(`<button class="mobile-action-btn edit" onclick="${editJs}">✏ Edit</button>`);
-          if (canDel) out.push(`<button class="mobile-action-btn delete" onclick="${deleteJs}">🗑 Delete</button>`);
-          return out.length ? `<div class="mobile-actions">${out.join('')}</div>` : '';
-        };
-
-        async function renderLabourMobileUI() {
-          const page = document.getElementById('page-labour');
-          if (!page) return;
-          const anchor = page.querySelector('.fbar');
-          const beforeEl = page.querySelector('.g3');
-          const box = ensureMobileBox(page, 'labourMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const date = document.getElementById('labDate')?.value || '';
-          const site = document.getElementById('labSite')?.value || '';
-          const des = document.getElementById('labDes')?.value || '';
-          const search = (document.getElementById('labSearch')?.value || '').toLowerCase();
-          let E = await dbGet('attendance');
-          if (date) E = E.filter(e => e.date === date);
-          if (site) E = E.filter(e => siteMatch(e, site, 'labSite'));
-          if (des) E = E.filter(e => (e.designation || '').toLowerCase() === des.toLowerCase());
-          if (search) E = E.filter(e => (e.worker_name || '').toLowerCase().includes(search));
-          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-          const total = E.reduce((s, e) => s + (+e.pay || 0), 0);
-          const present = E.filter(e => e.status === 'Present').length;
-          const halfDay = E.filter(e => e.status === 'Half Day').length;
-          const absent = E.filter(e => e.status === 'Absent').length;
-          const leave = E.filter(e => e.status === 'Leave').length;
-          const canEditAttendance = can('canEditAttendance');
-          const canDeleteAttendance = can('canDeleteAttendance');
-          box.innerHTML = `
-            <div class="mobile-summary-card">
-              <div class="mobile-summary-title">Total Pay (Filtered)</div>
-              <div class="mobile-summary-value">${fmtF(total)}</div>
-              <div class="mobile-summary-grid">
-                <div class="mobile-summary-row"><span>Present</span><strong style="color:#22c55e">${present}</strong></div>
-                <div class="mobile-summary-row"><span>Half Day</span><strong style="color:#facc15">${halfDay}</strong></div>
-                <div class="mobile-summary-row"><span>Absent</span><strong style="color:#f43f5e">${absent}</strong></div>
-                <div class="mobile-summary-row"><span>Leave</span><strong>${leave}</strong></div>
-              </div>
-            </div>
-            <div class="mobile-white-card">
-              <div class="mobile-section-head">
-                <div class="mobile-section-title">👷 Daily Attendance</div>
-                <div class="mobile-count-pill">${present} Present</div>
-              </div>
-              <div class="mobile-list">
-                ${E.length ? E.map(e => `
-                  <div class="mobile-entry">
-                    <div class="mobile-entry-top">
-                      <div>
-                        <div class="mobile-entry-name">${esc(e.worker_name || '')}</div>
-                        <div class="mobile-entry-sub">${esc(e.designation || '')}</div>
-                      </div>
-                      <span class="badge ${statusBadgeClass(e.status)}">${esc(e.status || '')}</span>
-                    </div>
-                    <div class="mobile-meta-grid">
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Gender</div><div class="mobile-meta-value">${esc(e.gender || '–')}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Site</div><div class="mobile-meta-value">${esc(e.site_name || '–')}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Hrs</div><div class="mobile-meta-value">${esc(e.hours ?? '–')}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Pay</div><div class="mobile-meta-value" style="color:#16a34a">${fmtF(e.pay)}</div></div>
-                    </div>
-                    ${e.remarks ? `<div class="mobile-remarks">Remarks: ${esc(e.remarks)}</div>` : ''}
-                    ${actionBtns(`editAttendance('${e.id}')`, `deleteAttendance('${e.id}')`, canEditAttendance, canDeleteAttendance)}
-                  </div>`).join('') : `<div class="mobile-empty">No records. Click &quot;+ Add Attendance&quot;.</div>`}
-              </div>
-            </div>`;
-        }
-
-        async function renderMaterialsMobileUI() {
-          const page = document.getElementById('page-materials');
-          if (!page) return;
-          const beforeEl = page.querySelector('.g3');
-          const box = ensureMobileBox(page, 'materialsMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const site = document.getElementById('matSite')?.value || '';
-          const name = document.getElementById('matName')?.value || '';
-          const type = document.getElementById('matType')?.value || '';
-          const date = document.getElementById('matDate')?.value || '';
-          const search = (document.getElementById('matSearch')?.value || '').toLowerCase();
-          let E = await dbGet('material_entries');
-          if (site) E = E.filter(e => siteMatch(e, site, 'matSite'));
-          if (name) E = E.filter(e => (e.material_name || '').toLowerCase() === name.toLowerCase());
-          if (type) E = E.filter(e => e.type === type);
-          if (date) E = E.filter(e => e.date === date);
-          if (search) E = E.filter(e => (e.material_name || '').toLowerCase().includes(search) || (e.party || '').toLowerCase().includes(search));
-          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-          const inVal = E.filter(e => e.type === 'In').reduce((s, e) => s + (+e.amount || 0), 0);
-          const outVal = E.filter(e => e.type === 'Out').reduce((s, e) => s + (+e.amount || 0), 0);
-          const inCnt = E.filter(e => e.type === 'In').length;
-          const outCnt = E.filter(e => e.type === 'Out').length;
-          let allE = await dbGet('material_entries');
-          if (site) allE = allE.filter(e => siteMatch(e, site, 'matSite'));
-          const mMast = await dbGet('materials_master');
-          const canEditMat = can('canEditMatEntry');
-          const canDeleteMat = can('canDeleteMatEntry');
-          const stockHtml = mMast.map(m => {
-            const inQ = allE.filter(e => e.material_id === m.id && e.type === 'In').reduce((s, e) => s + (+e.qty || 0), 0);
-            const outQ = allE.filter(e => e.material_id === m.id && e.type === 'Out').reduce((s, e) => s + (+e.qty || 0), 0);
-            const net = inQ - outQ;
-            if (!inQ && !outQ) return '';
-            const pct = inQ > 0 ? Math.max(8, Math.min(100, Math.round(Math.abs(net) / inQ * 100))) : 8;
-            const negative = net < 0;
-            return `
-              <div class="mobile-stock-row">
-                <div class="mobile-stock-line"><strong>${esc(m.name || '')}</strong><span class="mobile-stock-qty ${negative ? 'negative' : ''}">${net} ${esc(m.unit || '')}</span></div>
-                <div class="mobile-stock-bar"><div class="mobile-stock-fill ${negative ? 'negative' : ''}" style="width:${pct}%"></div></div>
-              </div>`;
-          }).join('') || '<div class="mobile-empty">No materials.</div>';
-          box.innerHTML = `
-            <div class="mobile-summary-card">
-              <div class="mobile-summary-title">IN Value</div>
-              <div class="mobile-summary-value">${fmtF(inVal)}</div>
-              <div class="mobile-summary-row"><span>OUT Value</span><strong style="color:#f87171">${fmtF(outVal)}</strong></div>
-              <div class="mobile-summary-row"><span>IN Entries</span><strong style="color:#22c55e">${inCnt}</strong></div>
-              <div class="mobile-summary-row"><span>OUT Entries</span><strong style="color:#f59e0b">${outCnt}</strong></div>
-            </div>
-            <div class="mobile-white-card">
-              <div class="mobile-section-title">📦 Stock</div>
-              <div style="margin-top:12px">${stockHtml}</div>
-            </div>
-            <div class="mobile-white-card">
-              <div class="mobile-section-title">🧱 Material Ledger</div>
-              <div class="mobile-list" style="margin-top:12px">
-                ${E.length ? E.map(e => `
-                  <div class="mobile-entry">
-                    <div class="mobile-entry-top">
-                      <div>
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px"><span class="badge ${e.type === 'In' ? 'bg-green' : 'bg-orange'}">${esc(e.type || '')}</span><div class="mobile-entry-name">${esc(e.material_name || '')}</div></div>
-                        <div class="mobile-entry-sub">${esc(e.site_name || '')}</div>
-                      </div>
-                      <div class="mobile-amount ${e.type === 'In' ? 'pos' : 'neg'}">${e.type === 'In' ? '+' : '-'}${fmtF(e.amount)}</div>
-                    </div>
-                    <div class="mobile-meta-grid">
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Date</div><div class="mobile-meta-value">${fmtDate(e.date)}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Qty</div><div class="mobile-meta-value">${esc(e.qty || 0)} ${esc(e.unit || '')}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Rate</div><div class="mobile-meta-value">${fmtF(e.rate)}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Party</div><div class="mobile-meta-value">${esc(e.party || '–')}</div></div>
-                    </div>
-                    ${actionBtns(`editMatEntry('${e.id}')`, `deleteMatEntry('${e.id}')`, canEditMat, canDeleteMat)}
-                  </div>`).join('') : '<div class="mobile-empty">No entries.</div>'}
-              </div>
-            </div>`;
-        }
-
-        async function renderCashMobileUI() {
-          const page = document.getElementById('page-cashbook');
-          if (!page) return;
-          const beforeEl = page.querySelector('.g5');
-          const box = ensureMobileBox(page, 'cashbookMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const site = document.getElementById('cashSite')?.value || '';
-          const type = document.getElementById('cashType')?.value || '';
-          const head = document.getElementById('cashHead')?.value || '';
-          const from = document.getElementById('cashFrom')?.value || '';
-          const to = document.getElementById('cashTo')?.value || '';
-          const search = (document.getElementById('cashSearch')?.value || '').toLowerCase();
-          let E = await dbGet('cashbook');
-          if (site) E = E.filter(e => siteMatch(e, site, 'cashSite'));
-          if (type) E = E.filter(e => e.type === type);
-          if (head) E = E.filter(e => e.head === head);
-          if (from) E = E.filter(e => String(e.date || '') >= from);
-          if (to) E = E.filter(e => String(e.date || '') <= to);
-          if (search) E = E.filter(e => [e.head, e.party, e.notes, e.site_name, e.mode].some(v => (v || '').toLowerCase().includes(search)));
-          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-          const totalSent = E.filter(e => e.type === 'Money Sent').reduce((s, e) => s + (+e.amount || 0), 0);
-          const totalExp = E.filter(e => e.type === 'Expense').reduce((s, e) => s + (+e.amount || 0), 0);
-          const balance = totalSent - totalExp;
-          const labourPaid = E.filter(e => e.head === 'Labour Payment').reduce((s, e) => s + (+e.amount || 0), 0);
-          const materialPurchased = E.filter(e => e.head === 'Material Purchase').reduce((s, e) => s + (+e.amount || 0), 0);
-          const canEditCash = can('canEditCash');
-          const canDeleteCash = can('canDeleteCash');
-          const grouped = {};
-          E.forEach(e => {
-            const k = e.site_name || 'Unknown Site';
-            grouped[k] ||= { sent: 0, exp: 0 };
-            if (e.type === 'Money Sent') grouped[k].sent += (+e.amount || 0); else grouped[k].exp += (+e.amount || 0);
-          });
-          box.innerHTML = `
-            <div class="mobile-split-grid">
-              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#22c55e">↗</div><div class="mobile-mini-value" style="color:#22c55e">${fmtF(totalSent)}</div><div class="mobile-mini-label">Total Sent</div></div>
-              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#ef4444">↘</div><div class="mobile-mini-value" style="color:#ef4444">${fmtF(totalExp)}</div><div class="mobile-mini-label">Total Expenses</div></div>
-              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#3b82f6">₹</div><div class="mobile-mini-value" style="color:#3b82f6">${fmtF(balance)}</div><div class="mobile-mini-label">Balance</div></div>
-              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#eab308">◌</div><div class="mobile-mini-value" style="color:#eab308">${fmtF(labourPaid)}</div><div class="mobile-mini-label">Labour Paid</div></div>
-            </div>
-            <div class="mobile-mini-stat" style="margin-bottom:14px"><div class="mobile-mini-icon" style="color:#f97316">📦</div><div class="mobile-mini-value" style="color:#f97316">${fmtF(materialPurchased)}</div><div class="mobile-mini-label">Material Purchased</div></div>
-            <div class="mobile-white-card">
-              <div class="mobile-section-title">💰 Transactions</div>
-              <div class="mobile-list" style="margin-top:12px">
-                ${E.length ? E.map(e => `
-                  <div class="mobile-entry">
-                    <div class="mobile-entry-top">
-                      <div>
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px"><span class="badge ${e.type === 'Money Sent' ? 'bg-green' : 'bg-red'}">${e.type === 'Money Sent' ? 'Sent' : 'Exp'}</span><div class="mobile-entry-name">${esc(e.head || '')}</div></div>
-                        <div class="mobile-txn-meta">${fmtDate(e.date)} &nbsp;•&nbsp; ${esc(e.site_name || '')} &nbsp;•&nbsp; ${esc(e.mode || '')}${e.party ? ` &nbsp;•&nbsp; ${esc(e.party)}` : ''}${e.notes ? ` &nbsp;•&nbsp; ${esc(e.notes)}` : ''}</div>
-                      </div>
-                      <div class="mobile-amount ${e.type === 'Money Sent' ? 'pos' : 'neg'}">${e.type === 'Money Sent' ? '+' : ''}${fmtF(e.amount)}</div>
-                    </div>
-                    ${actionBtns(`editCash('${e.id}')`, `deleteCash('${e.id}')`, canEditCash, canDeleteCash)}
-                  </div>`).join('') : '<div class="mobile-empty">No entries. Click &quot;+ Add Entry&quot;.</div>'}
-              </div>
-            </div>
-            <div class="mobile-white-card">
-              <div class="mobile-section-title">🏗 Site Balance</div>
-              <div class="mobile-list" style="margin-top:12px">
-                ${Object.keys(grouped).length ? Object.entries(grouped).map(([name, v]) => `
-                  <div class="mobile-entry">
-                    <div class="mobile-entry-top" style="margin-bottom:0">
-                      <div class="mobile-entry-name">${esc(name)}</div>
-                      <div class="mobile-amount ${v.sent - v.exp >= 0 ? 'pos' : 'neg'}">${fmtF(v.sent - v.exp)}</div>
-                    </div>
-                    <div class="mobile-meta-grid" style="margin-top:10px">
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Sent</div><div class="mobile-meta-value" style="color:#f97316">${fmtF(v.sent)}</div></div>
-                      <div class="mobile-meta-item"><div class="mobile-meta-label">Expenses</div><div class="mobile-meta-value" style="color:#ef4444">${fmtF(v.exp)}</div></div>
-                    </div>
-                  </div>`).join('') : '<div class="mobile-empty">No site balance data.</div>'}
-              </div>
-            </div>`;
-        }
-
-        async function renderSitesMobileUI() {
-          const wrap = document.getElementById('ms-sites');
-          if (!wrap) return;
-          const beforeEl = wrap.querySelector('.card');
-          const box = ensureMobileBox(wrap, 'sitesMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
-          let rows = await dbGet('sites');
-          if (search) rows = rows.filter(s => [s.name, s.city, s.address, s.supervisor_name, s.phone].some(v => (v || '').toLowerCase().includes(search)));
-          const canEditSite = can('canEditSite');
-          const canDeleteSite = can('canDeleteSite');
-          box.innerHTML = rows.length ? rows.map((s, i) => {
-            const eng = Array.isArray(s.engineers) ? s.engineers.length : (String(s.engineers || '').trim() ? String(s.engineers).split(',').filter(Boolean).length : 0);
-            const sup = s.supervisor_name || s.supervisor || '–';
-            const location = s.city || s.address || '–';
-            return `
-              <div class="mobile-master-card">
-                <div class="mobile-master-head">
-                  <div class="mobile-master-left">
-                    <div class="mobile-master-avatar">🏗</div>
-                    <div>
-                      <div class="mobile-master-code">${padCode(i + 1)}</div>
-                      <div class="mobile-master-name">${esc(s.name || '')}</div>
-                      <div class="mobile-master-sub">${esc(location)}</div>
-                    </div>
-                  </div>
-                  <span class="badge ${statusBadgeClass(s.status || 'Active')}">${esc(s.status || 'Active')}</span>
-                </div>
-                <div class="mobile-info-grid">
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Start Date</div><div class="mobile-meta-value">${fmtDate(s.start_date || s.date || '–')}</div></div>
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Supervisor</div><div class="mobile-meta-value">${esc(sup)}</div></div>
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Engineers</div><div class="mobile-meta-value">${eng} assigned</div></div>
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Phone</div><div class="mobile-meta-value">${esc(s.phone || '–')}</div></div>
-                </div>
-                ${actionBtns(`editSite('${s.id}')`, `deleteSite('${s.id}')`, canEditSite, canDeleteSite)}
-              </div>`;
-          }).join('') : '<div class="mobile-empty">No sites found.</div>';
-        }
-
-        async function renderWorkersMobileUI() {
-          const wrap = document.getElementById('ms-workers');
-          if (!wrap) return;
-          const beforeEl = wrap.querySelector('.card');
-          const box = ensureMobileBox(wrap, 'workersMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
-          const site = document.getElementById('wfSite')?.value || '';
-          const des = document.getElementById('wfDes')?.value || '';
-          let rows = await dbGet('workers');
-          if (site) rows = rows.filter(w => siteMatch(w, site, 'wfSite'));
-          if (des) rows = rows.filter(w => (w.designation || '').toLowerCase() === des.toLowerCase());
-          if (search) rows = rows.filter(w => [w.name, w.worker_name, w.phone, w.site_name].some(v => (v || '').toLowerCase().includes(search)));
-          const canEditWorker = can('canEditWorker');
-          const canDeleteWorker = can('canDeleteWorker');
-          box.innerHTML = rows.length ? rows.map((w) => {
-            const name = w.name || w.worker_name || '';
-            return `
-              <div class="mobile-master-card">
-                <div class="mobile-master-head">
-                  <div class="mobile-master-left">
-                    <div class="mobile-master-avatar">${initials(name)}</div>
-                    <div>
-                      <div class="mobile-master-name">${esc(name)}</div>
-                      <div class="mobile-master-sub">${esc(w.designation || '')} • ${esc(w.gender || '')}</div>
-                    </div>
-                  </div>
-                  <span class="badge ${statusBadgeClass(w.status || 'Active')}">${esc(w.status || 'Active')}</span>
-                </div>
-                <div class="mobile-info-grid">
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Site</div><div class="mobile-meta-value">${esc(w.site_name || '–')}</div></div>
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Wage/Day</div><div class="mobile-meta-value">${fmtF(w.wage || w.daily_wage || 0)}</div></div>
-                  <div class="mobile-info-box"><div class="mobile-meta-label">Phone</div><div class="mobile-meta-value">${esc(w.phone || '–')}</div></div>
-                </div>
-                ${actionBtns(`editWorker('${w.id}')`, `deleteWorker('${w.id}')`, canEditWorker, canDeleteWorker)}
-              </div>`;
-          }).join('') : '<div class="mobile-empty">No workers found.</div>';
-        }
-
-        async function renderMatMasterMobileUI() {
-          const wrap = document.getElementById('ms-materials');
-          if (!wrap) return;
-          const beforeEl = wrap.querySelector('.card');
-          const box = ensureMobileBox(wrap, 'matMasterMobileView', beforeEl);
-          if (!isPhoneView()) { box.innerHTML = ''; return; }
-          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
-          let rows = await dbGet('materials_master');
-          if (search) rows = rows.filter(m => [m.name, m.category, m.unit].some(v => (v || '').toLowerCase().includes(search)));
-          const canEditMaterial = can('canEditMaterial');
-          const canDeleteMaterial = can('canDeleteMaterial');
-          box.innerHTML = rows.length ? rows.map((m, i) => `
-            <div class="mobile-master-card">
-              <div class="mobile-master-head">
-                <div class="mobile-master-left">
-                  <div class="mobile-master-avatar">📦</div>
-                  <div>
-                    <div class="mobile-master-code">${padCode(i + 1)}</div>
-                    <div class="mobile-master-name">${esc(m.name || '')}</div>
-                    <div class="mobile-master-sub">${esc(m.category || '')}</div>
-                  </div>
-                </div>
-                <span class="badge ${statusBadgeClass(m.status || 'Active')}">${esc(m.status || 'Active')}</span>
-              </div>
-              <div class="mobile-info-grid">
-                <div class="mobile-info-box"><div class="mobile-meta-label">Unit</div><div class="mobile-meta-value">${esc(m.unit || '–')}</div></div>
-                <div class="mobile-info-box"><div class="mobile-meta-label">Default Rate</div><div class="mobile-meta-value">${fmtF(m.default_rate || m.rate || 0)}</div></div>
-              </div>
-              ${actionBtns(`editMatMaster('${m.id}')`, `deleteMatMaster('${m.id}')`, canEditMaterial, canDeleteMaterial)}
-            </div>`).join('') : '<div class="mobile-empty">No materials found.</div>';
-        }
-
-        const mobileHooksApplied = new Set();
-
-        const wrapAsyncWhenReady = (name, fn) => {
-          if (mobileHooksApplied.has(name)) return true;
-          const original = window[name];
-          if (typeof original !== 'function') return false;
-
-          window[name] = async function (...args) {
-            const out = await original.apply(this, args);
-            try { await fn(); } catch (e) { console.error(e); }
-            return out;
-          };
-
-          mobileHooksApplied.add(name);
-          return true;
-        };
-
-        const renderAllMobileViews = () => {
-          renderLabourMobileUI();
-          renderMaterialsMobileUI();
-          renderCashMobileUI();
-          renderSitesMobileUI();
-          renderWorkersMobileUI();
-          renderMatMasterMobileUI();
-        };
-
-        const applyMobileHooks = () => {
-          const ok = [
-            wrapAsyncWhenReady('renderLabour', renderLabourMobileUI),
-            wrapAsyncWhenReady('renderMaterials', renderMaterialsMobileUI),
-            wrapAsyncWhenReady('renderCash', renderCashMobileUI),
-            wrapAsyncWhenReady('renderSites', renderSitesMobileUI),
-            wrapAsyncWhenReady('renderWorkers', renderWorkersMobileUI),
-            wrapAsyncWhenReady('renderMatMaster', renderMatMasterMobileUI),
-          ];
-
-          if (ok.every(Boolean)) {
-            renderAllMobileViews();
-            return;
-          }
-
-          setTimeout(applyMobileHooks, 200);
-        };
-
-        window.addEventListener('load', applyMobileHooks);
-        window.addEventListener('resize', renderAllMobileViews);
-
-
-      })();
-      // === END MOBILE UI REFRESH PATCH ===
+      
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -4798,7 +4388,419 @@
           document.getElementById("appWrapper").style.display = "none";
         }
       };
-    </script>
+    
+// === MOBILE UI REFRESH PATCH ===
+      (function () {
+        const isPhoneView = () => window.innerWidth <= 600;
+        const esc = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        const selectedText = (id) => {
+          const el = document.getElementById(id);
+          return (el?.options?.[el.selectedIndex]?.text || "").trim();
+        };
+        const fmtDate = (v) => v || "";
+        const padCode = (n) => `# ${String(n).padStart(3, '0')}`;
+        const ensureMobileBox = (parent, id, beforeEl) => {
+          let el = document.getElementById(id);
+          if (!el) {
+            el = document.createElement('div');
+            el.id = id;
+            el.className = 'mobile-alt-view';
+            if (beforeEl) parent.insertBefore(el, beforeEl); else parent.appendChild(el);
+          }
+          return el;
+        };
+        const initials = (name) => {
+          const parts = String(name || '?').trim().split(/\s+/).filter(Boolean);
+          return (parts[0]?.[0] || '?').toUpperCase();
+        };
+        const statusBadgeClass = (status) => ({ Present: 'bg-green', 'Half Day': 'bg-orange', Absent: 'bg-red', Leave: 'bg-gray', Active: 'bg-green', Inactive: 'bg-gray', Completed: 'bg-blue', 'On Hold': 'bg-orange' }[status] || 'bg-gray');
+        const siteMatch = (entry, siteId, selectId) => {
+          if (!siteId) return true;
+          const sName = selectedText(selectId);
+          return entry.site_id === siteId || (entry.site_name && entry.site_name.trim() === sName) || (entry.sitename && entry.sitename.trim() === sName);
+        };
+        const actionBtns = (editJs, deleteJs, canEdit, canDel) => {
+          const out = [];
+          if (canEdit) out.push(`<button class="mobile-action-btn edit" onclick="${editJs}">✏ Edit</button>`);
+          if (canDel) out.push(`<button class="mobile-action-btn delete" onclick="${deleteJs}">🗑 Delete</button>`);
+          return out.length ? `<div class="mobile-actions">${out.join('')}</div>` : '';
+        };
+
+        async function renderLabourMobileUI() {
+          const page = document.getElementById('page-labour');
+          if (!page) return;
+          const anchor = page.querySelector('.fbar');
+          const beforeEl = page.querySelector('.g3');
+          const box = ensureMobileBox(page, 'labourMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const date = document.getElementById('labDate')?.value || '';
+          const site = document.getElementById('labSite')?.value || '';
+          const des = document.getElementById('labDes')?.value || '';
+          const search = (document.getElementById('labSearch')?.value || '').toLowerCase();
+          let E = await dbGet('attendance');
+          if (date) E = E.filter(e => e.date === date);
+          if (site) E = E.filter(e => siteMatch(e, site, 'labSite'));
+          if (des) E = E.filter(e => (e.designation || '').toLowerCase() === des.toLowerCase());
+          if (search) E = E.filter(e => (e.worker_name || '').toLowerCase().includes(search));
+          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+          const total = E.reduce((s, e) => s + (+e.pay || 0), 0);
+          const present = E.filter(e => e.status === 'Present').length;
+          const halfDay = E.filter(e => e.status === 'Half Day').length;
+          const absent = E.filter(e => e.status === 'Absent').length;
+          const leave = E.filter(e => e.status === 'Leave').length;
+          const canEditAttendance = can('canEditAttendance');
+          const canDeleteAttendance = can('canDeleteAttendance');
+          box.innerHTML = `
+            <div class="mobile-summary-card">
+              <div class="mobile-summary-title">Total Pay (Filtered)</div>
+              <div class="mobile-summary-value">${fmtF(total)}</div>
+              <div class="mobile-summary-grid">
+                <div class="mobile-summary-row"><span>Present</span><strong style="color:#22c55e">${present}</strong></div>
+                <div class="mobile-summary-row"><span>Half Day</span><strong style="color:#facc15">${halfDay}</strong></div>
+                <div class="mobile-summary-row"><span>Absent</span><strong style="color:#f43f5e">${absent}</strong></div>
+                <div class="mobile-summary-row"><span>Leave</span><strong>${leave}</strong></div>
+              </div>
+            </div>
+            <div class="mobile-white-card">
+              <div class="mobile-section-head">
+                <div class="mobile-section-title">👷 Daily Attendance</div>
+                <div class="mobile-count-pill">${present} Present</div>
+              </div>
+              <div class="mobile-list">
+                ${E.length ? E.map(e => `
+                  <div class="mobile-entry">
+                    <div class="mobile-entry-top">
+                      <div>
+                        <div class="mobile-entry-name">${esc(e.worker_name || '')}</div>
+                        <div class="mobile-entry-sub">${esc(e.designation || '')}</div>
+                      </div>
+                      <span class="badge ${statusBadgeClass(e.status)}">${esc(e.status || '')}</span>
+                    </div>
+                    <div class="mobile-meta-grid">
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Gender</div><div class="mobile-meta-value">${esc(e.gender || '–')}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Site</div><div class="mobile-meta-value">${esc(e.site_name || '–')}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Hrs</div><div class="mobile-meta-value">${esc(e.hours ?? '–')}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Pay</div><div class="mobile-meta-value" style="color:#16a34a">${fmtF(e.pay)}</div></div>
+                    </div>
+                    ${e.remarks ? `<div class="mobile-remarks">Remarks: ${esc(e.remarks)}</div>` : ''}
+                    ${actionBtns(`editAttendance('${e.id}')`, `deleteAttendance('${e.id}')`, canEditAttendance, canDeleteAttendance)}
+                  </div>`).join('') : `<div class="mobile-empty">No records. Click &quot;+ Add Attendance&quot;.</div>`}
+              </div>
+            </div>`;
+        }
+
+        async function renderMaterialsMobileUI() {
+          const page = document.getElementById('page-materials');
+          if (!page) return;
+          const beforeEl = page.querySelector('.g3');
+          const box = ensureMobileBox(page, 'materialsMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const site = document.getElementById('matSite')?.value || '';
+          const name = document.getElementById('matName')?.value || '';
+          const type = document.getElementById('matType')?.value || '';
+          const date = document.getElementById('matDate')?.value || '';
+          const search = (document.getElementById('matSearch')?.value || '').toLowerCase();
+          let E = await dbGet('material_entries');
+          if (site) E = E.filter(e => siteMatch(e, site, 'matSite'));
+          if (name) E = E.filter(e => (e.material_name || '').toLowerCase() === name.toLowerCase());
+          if (type) E = E.filter(e => e.type === type);
+          if (date) E = E.filter(e => e.date === date);
+          if (search) E = E.filter(e => (e.material_name || '').toLowerCase().includes(search) || (e.party || '').toLowerCase().includes(search));
+          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+          const inVal = E.filter(e => e.type === 'In').reduce((s, e) => s + (+e.amount || 0), 0);
+          const outVal = E.filter(e => e.type === 'Out').reduce((s, e) => s + (+e.amount || 0), 0);
+          const inCnt = E.filter(e => e.type === 'In').length;
+          const outCnt = E.filter(e => e.type === 'Out').length;
+          let allE = await dbGet('material_entries');
+          if (site) allE = allE.filter(e => siteMatch(e, site, 'matSite'));
+          const mMast = await dbGet('materials_master');
+          const canEditMat = can('canEditMatEntry');
+          const canDeleteMat = can('canDeleteMatEntry');
+          const stockHtml = mMast.map(m => {
+            const inQ = allE.filter(e => e.material_id === m.id && e.type === 'In').reduce((s, e) => s + (+e.qty || 0), 0);
+            const outQ = allE.filter(e => e.material_id === m.id && e.type === 'Out').reduce((s, e) => s + (+e.qty || 0), 0);
+            const net = inQ - outQ;
+            if (!inQ && !outQ) return '';
+            const pct = inQ > 0 ? Math.max(8, Math.min(100, Math.round(Math.abs(net) / inQ * 100))) : 8;
+            const negative = net < 0;
+            return `
+              <div class="mobile-stock-row">
+                <div class="mobile-stock-line"><strong>${esc(m.name || '')}</strong><span class="mobile-stock-qty ${negative ? 'negative' : ''}">${net} ${esc(m.unit || '')}</span></div>
+                <div class="mobile-stock-bar"><div class="mobile-stock-fill ${negative ? 'negative' : ''}" style="width:${pct}%"></div></div>
+              </div>`;
+          }).join('') || '<div class="mobile-empty">No materials.</div>';
+          box.innerHTML = `
+            <div class="mobile-summary-card">
+              <div class="mobile-summary-title">IN Value</div>
+              <div class="mobile-summary-value">${fmtF(inVal)}</div>
+              <div class="mobile-summary-row"><span>OUT Value</span><strong style="color:#f87171">${fmtF(outVal)}</strong></div>
+              <div class="mobile-summary-row"><span>IN Entries</span><strong style="color:#22c55e">${inCnt}</strong></div>
+              <div class="mobile-summary-row"><span>OUT Entries</span><strong style="color:#f59e0b">${outCnt}</strong></div>
+            </div>
+            <div class="mobile-white-card">
+              <div class="mobile-section-title">📦 Stock</div>
+              <div style="margin-top:12px">${stockHtml}</div>
+            </div>
+            <div class="mobile-white-card">
+              <div class="mobile-section-title">🧱 Material Ledger</div>
+              <div class="mobile-list" style="margin-top:12px">
+                ${E.length ? E.map(e => `
+                  <div class="mobile-entry">
+                    <div class="mobile-entry-top">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px"><span class="badge ${e.type === 'In' ? 'bg-green' : 'bg-orange'}">${esc(e.type || '')}</span><div class="mobile-entry-name">${esc(e.material_name || '')}</div></div>
+                        <div class="mobile-entry-sub">${esc(e.site_name || '')}</div>
+                      </div>
+                      <div class="mobile-amount ${e.type === 'In' ? 'pos' : 'neg'}">${e.type === 'In' ? '+' : '-'}${fmtF(e.amount)}</div>
+                    </div>
+                    <div class="mobile-meta-grid">
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Date</div><div class="mobile-meta-value">${fmtDate(e.date)}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Qty</div><div class="mobile-meta-value">${esc(e.qty || 0)} ${esc(e.unit || '')}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Rate</div><div class="mobile-meta-value">${fmtF(e.rate)}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Party</div><div class="mobile-meta-value">${esc(e.party || '–')}</div></div>
+                    </div>
+                    ${actionBtns(`editMatEntry('${e.id}')`, `deleteMatEntry('${e.id}')`, canEditMat, canDeleteMat)}
+                  </div>`).join('') : '<div class="mobile-empty">No entries.</div>'}
+              </div>
+            </div>`;
+        }
+
+        async function renderCashMobileUI() {
+          const page = document.getElementById('page-cashbook');
+          if (!page) return;
+          const beforeEl = page.querySelector('.g5');
+          const box = ensureMobileBox(page, 'cashbookMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const site = document.getElementById('cashSite')?.value || '';
+          const type = document.getElementById('cashType')?.value || '';
+          const head = document.getElementById('cashHead')?.value || '';
+          const from = document.getElementById('cashFrom')?.value || '';
+          const to = document.getElementById('cashTo')?.value || '';
+          const search = (document.getElementById('cashSearch')?.value || '').toLowerCase();
+          let E = await dbGet('cashbook');
+          if (site) E = E.filter(e => siteMatch(e, site, 'cashSite'));
+          if (type) E = E.filter(e => e.type === type);
+          if (head) E = E.filter(e => e.head === head);
+          if (from) E = E.filter(e => String(e.date || '') >= from);
+          if (to) E = E.filter(e => String(e.date || '') <= to);
+          if (search) E = E.filter(e => [e.head, e.party, e.notes, e.site_name, e.mode].some(v => (v || '').toLowerCase().includes(search)));
+          E.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+          const totalSent = E.filter(e => e.type === 'Money Sent').reduce((s, e) => s + (+e.amount || 0), 0);
+          const totalExp = E.filter(e => e.type === 'Expense').reduce((s, e) => s + (+e.amount || 0), 0);
+          const balance = totalSent - totalExp;
+          const labourPaid = E.filter(e => e.head === 'Labour Payment').reduce((s, e) => s + (+e.amount || 0), 0);
+          const materialPurchased = E.filter(e => e.head === 'Material Purchase').reduce((s, e) => s + (+e.amount || 0), 0);
+          const canEditCash = can('canEditCash');
+          const canDeleteCash = can('canDeleteCash');
+          const grouped = {};
+          E.forEach(e => {
+            const k = e.site_name || 'Unknown Site';
+            grouped[k] ||= { sent: 0, exp: 0 };
+            if (e.type === 'Money Sent') grouped[k].sent += (+e.amount || 0); else grouped[k].exp += (+e.amount || 0);
+          });
+          box.innerHTML = `
+            <div class="mobile-split-grid">
+              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#22c55e">↗</div><div class="mobile-mini-value" style="color:#22c55e">${fmtF(totalSent)}</div><div class="mobile-mini-label">Total Sent</div></div>
+              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#ef4444">↘</div><div class="mobile-mini-value" style="color:#ef4444">${fmtF(totalExp)}</div><div class="mobile-mini-label">Total Expenses</div></div>
+              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#3b82f6">₹</div><div class="mobile-mini-value" style="color:#3b82f6">${fmtF(balance)}</div><div class="mobile-mini-label">Balance</div></div>
+              <div class="mobile-mini-stat"><div class="mobile-mini-icon" style="color:#eab308">◌</div><div class="mobile-mini-value" style="color:#eab308">${fmtF(labourPaid)}</div><div class="mobile-mini-label">Labour Paid</div></div>
+            </div>
+            <div class="mobile-mini-stat" style="margin-bottom:14px"><div class="mobile-mini-icon" style="color:#f97316">📦</div><div class="mobile-mini-value" style="color:#f97316">${fmtF(materialPurchased)}</div><div class="mobile-mini-label">Material Purchased</div></div>
+            <div class="mobile-white-card">
+              <div class="mobile-section-title">💰 Transactions</div>
+              <div class="mobile-list" style="margin-top:12px">
+                ${E.length ? E.map(e => `
+                  <div class="mobile-entry">
+                    <div class="mobile-entry-top">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px"><span class="badge ${e.type === 'Money Sent' ? 'bg-green' : 'bg-red'}">${e.type === 'Money Sent' ? 'Sent' : 'Exp'}</span><div class="mobile-entry-name">${esc(e.head || '')}</div></div>
+                        <div class="mobile-txn-meta">${fmtDate(e.date)} &nbsp;•&nbsp; ${esc(e.site_name || '')} &nbsp;•&nbsp; ${esc(e.mode || '')}${e.party ? ` &nbsp;•&nbsp; ${esc(e.party)}` : ''}${e.notes ? ` &nbsp;•&nbsp; ${esc(e.notes)}` : ''}</div>
+                      </div>
+                      <div class="mobile-amount ${e.type === 'Money Sent' ? 'pos' : 'neg'}">${e.type === 'Money Sent' ? '+' : ''}${fmtF(e.amount)}</div>
+                    </div>
+                    ${actionBtns(`editCash('${e.id}')`, `deleteCash('${e.id}')`, canEditCash, canDeleteCash)}
+                  </div>`).join('') : '<div class="mobile-empty">No entries. Click &quot;+ Add Entry&quot;.</div>'}
+              </div>
+            </div>
+            <div class="mobile-white-card">
+              <div class="mobile-section-title">🏗 Site Balance</div>
+              <div class="mobile-list" style="margin-top:12px">
+                ${Object.keys(grouped).length ? Object.entries(grouped).map(([name, v]) => `
+                  <div class="mobile-entry">
+                    <div class="mobile-entry-top" style="margin-bottom:0">
+                      <div class="mobile-entry-name">${esc(name)}</div>
+                      <div class="mobile-amount ${v.sent - v.exp >= 0 ? 'pos' : 'neg'}">${fmtF(v.sent - v.exp)}</div>
+                    </div>
+                    <div class="mobile-meta-grid" style="margin-top:10px">
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Sent</div><div class="mobile-meta-value" style="color:#f97316">${fmtF(v.sent)}</div></div>
+                      <div class="mobile-meta-item"><div class="mobile-meta-label">Expenses</div><div class="mobile-meta-value" style="color:#ef4444">${fmtF(v.exp)}</div></div>
+                    </div>
+                  </div>`).join('') : '<div class="mobile-empty">No site balance data.</div>'}
+              </div>
+            </div>`;
+        }
+
+        async function renderSitesMobileUI() {
+          const wrap = document.getElementById('ms-sites');
+          if (!wrap) return;
+          const beforeEl = wrap.querySelector('.card');
+          const box = ensureMobileBox(wrap, 'sitesMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
+          let rows = await dbGet('sites');
+          if (search) rows = rows.filter(s => [s.name, s.city, s.address, s.supervisor_name, s.phone].some(v => (v || '').toLowerCase().includes(search)));
+          const canEditSite = can('canEditSite');
+          const canDeleteSite = can('canDeleteSite');
+          box.innerHTML = rows.length ? rows.map((s, i) => {
+            const eng = Array.isArray(s.engineers) ? s.engineers.length : (String(s.engineers || '').trim() ? String(s.engineers).split(',').filter(Boolean).length : 0);
+            const sup = s.supervisor_name || s.supervisor || '–';
+            const location = s.city || s.address || '–';
+            return `
+              <div class="mobile-master-card">
+                <div class="mobile-master-head">
+                  <div class="mobile-master-left">
+                    <div class="mobile-master-avatar">🏗</div>
+                    <div>
+                      <div class="mobile-master-code">${padCode(i + 1)}</div>
+                      <div class="mobile-master-name">${esc(s.name || '')}</div>
+                      <div class="mobile-master-sub">${esc(location)}</div>
+                    </div>
+                  </div>
+                  <span class="badge ${statusBadgeClass(s.status || 'Active')}">${esc(s.status || 'Active')}</span>
+                </div>
+                <div class="mobile-info-grid">
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Start Date</div><div class="mobile-meta-value">${fmtDate(s.start_date || s.date || '–')}</div></div>
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Supervisor</div><div class="mobile-meta-value">${esc(sup)}</div></div>
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Engineers</div><div class="mobile-meta-value">${eng} assigned</div></div>
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Phone</div><div class="mobile-meta-value">${esc(s.phone || '–')}</div></div>
+                </div>
+                ${actionBtns(`editSite('${s.id}')`, `deleteSite('${s.id}')`, canEditSite, canDeleteSite)}
+              </div>`;
+          }).join('') : '<div class="mobile-empty">No sites found.</div>';
+        }
+
+        async function renderWorkersMobileUI() {
+          const wrap = document.getElementById('ms-workers');
+          if (!wrap) return;
+          const beforeEl = wrap.querySelector('.card');
+          const box = ensureMobileBox(wrap, 'workersMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
+          const site = document.getElementById('wfSite')?.value || '';
+          const des = document.getElementById('wfDes')?.value || '';
+          let rows = await dbGet('workers');
+          if (site) rows = rows.filter(w => siteMatch(w, site, 'wfSite'));
+          if (des) rows = rows.filter(w => (w.designation || '').toLowerCase() === des.toLowerCase());
+          if (search) rows = rows.filter(w => [w.name, w.worker_name, w.phone, w.site_name].some(v => (v || '').toLowerCase().includes(search)));
+          const canEditWorker = can('canEditWorker');
+          const canDeleteWorker = can('canDeleteWorker');
+          box.innerHTML = rows.length ? rows.map((w) => {
+            const name = w.name || w.worker_name || '';
+            return `
+              <div class="mobile-master-card">
+                <div class="mobile-master-head">
+                  <div class="mobile-master-left">
+                    <div class="mobile-master-avatar">${initials(name)}</div>
+                    <div>
+                      <div class="mobile-master-name">${esc(name)}</div>
+                      <div class="mobile-master-sub">${esc(w.designation || '')} • ${esc(w.gender || '')}</div>
+                    </div>
+                  </div>
+                  <span class="badge ${statusBadgeClass(w.status || 'Active')}">${esc(w.status || 'Active')}</span>
+                </div>
+                <div class="mobile-info-grid">
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Site</div><div class="mobile-meta-value">${esc(w.site_name || '–')}</div></div>
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Wage/Day</div><div class="mobile-meta-value">${fmtF(w.wage || w.daily_wage || 0)}</div></div>
+                  <div class="mobile-info-box"><div class="mobile-meta-label">Phone</div><div class="mobile-meta-value">${esc(w.phone || '–')}</div></div>
+                </div>
+                ${actionBtns(`editWorker('${w.id}')`, `deleteWorker('${w.id}')`, canEditWorker, canDeleteWorker)}
+              </div>`;
+          }).join('') : '<div class="mobile-empty">No workers found.</div>';
+        }
+
+        async function renderMatMasterMobileUI() {
+          const wrap = document.getElementById('ms-materials');
+          if (!wrap) return;
+          const beforeEl = wrap.querySelector('.card');
+          const box = ensureMobileBox(wrap, 'matMasterMobileView', beforeEl);
+          if (!isPhoneView()) { box.innerHTML = ''; return; }
+          const search = (wrap.querySelector('.fbar input')?.value || '').toLowerCase();
+          let rows = await dbGet('materials_master');
+          if (search) rows = rows.filter(m => [m.name, m.category, m.unit].some(v => (v || '').toLowerCase().includes(search)));
+          const canEditMaterial = can('canEditMaterial');
+          const canDeleteMaterial = can('canDeleteMaterial');
+          box.innerHTML = rows.length ? rows.map((m, i) => `
+            <div class="mobile-master-card">
+              <div class="mobile-master-head">
+                <div class="mobile-master-left">
+                  <div class="mobile-master-avatar">📦</div>
+                  <div>
+                    <div class="mobile-master-code">${padCode(i + 1)}</div>
+                    <div class="mobile-master-name">${esc(m.name || '')}</div>
+                    <div class="mobile-master-sub">${esc(m.category || '')}</div>
+                  </div>
+                </div>
+                <span class="badge ${statusBadgeClass(m.status || 'Active')}">${esc(m.status || 'Active')}</span>
+              </div>
+              <div class="mobile-info-grid">
+                <div class="mobile-info-box"><div class="mobile-meta-label">Unit</div><div class="mobile-meta-value">${esc(m.unit || '–')}</div></div>
+                <div class="mobile-info-box"><div class="mobile-meta-label">Default Rate</div><div class="mobile-meta-value">${fmtF(m.default_rate || m.rate || 0)}</div></div>
+              </div>
+              ${actionBtns(`editMatMaster('${m.id}')`, `deleteMatMaster('${m.id}')`, canEditMaterial, canDeleteMaterial)}
+            </div>`).join('') : '<div class="mobile-empty">No materials found.</div>';
+        }
+
+        const mobileHooksApplied = new Set();
+
+        const wrapAsyncWhenReady = (name, fn) => {
+          if (mobileHooksApplied.has(name)) return true;
+          const original = window[name];
+          if (typeof original !== 'function') return false;
+
+          window[name] = async function (...args) {
+            const out = await original.apply(this, args);
+            try { await fn(); } catch (e) { console.error(e); }
+            return out;
+          };
+
+          mobileHooksApplied.add(name);
+          return true;
+        };
+
+        const renderAllMobileViews = () => {
+          renderLabourMobileUI();
+          renderMaterialsMobileUI();
+          renderCashMobileUI();
+          renderSitesMobileUI();
+          renderWorkersMobileUI();
+          renderMatMasterMobileUI();
+        };
+
+        const applyMobileHooks = () => {
+          const ok = [
+            wrapAsyncWhenReady('renderLabour', renderLabourMobileUI),
+            wrapAsyncWhenReady('renderMaterials', renderMaterialsMobileUI),
+            wrapAsyncWhenReady('renderCash', renderCashMobileUI),
+            wrapAsyncWhenReady('renderSites', renderSitesMobileUI),
+            wrapAsyncWhenReady('renderWorkers', renderWorkersMobileUI),
+            wrapAsyncWhenReady('renderMatMaster', renderMatMasterMobileUI),
+          ];
+
+          if (ok.every(Boolean)) {
+            renderAllMobileViews();
+            return;
+          }
+
+          setTimeout(applyMobileHooks, 200);
+        };
+
+        window.addEventListener('load', applyMobileHooks);
+        window.addEventListener('resize', renderAllMobileViews);
+
+
+      })();
+      // === END MOBILE UI REFRESH PATCH ===
+</script>
   
     <!-- ════════════ BOTTOM NAV ════════════ -->
     <div id="bottomNav">
